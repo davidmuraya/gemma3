@@ -1,7 +1,11 @@
 ## Project Overview
 
 This repository contains a single Python script, `main.py`, that provides a local conversational interface to an Ollama model (`gemma3:4b`) with built-in tool-calling capabilities. 
+
 Gemma3 uses pythonic function calling. https://www.philschmid.de/gemma-function-calling
+
+This is quite different approach from the OpenAI-style function calling with json schema.
+
 You can read about pythonic function calling here: https://huggingface.co/blog/andthattoo/dria-agent-a
 
 The script:
@@ -17,6 +21,7 @@ The script:
 /  
 ├── main.py    # Chat client with tool-calling logic
 └── README.md  # Project documentation
+└── requirements.txt  # Python requirements
 ```
 
 ## Prerequisites

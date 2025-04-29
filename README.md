@@ -48,7 +48,6 @@ The script:
    ```bash
    pip install -r requirements.txt
    ```
-   > **Note:** Ensure `ollama` and `requests` are included in your `requirements.txt`.
 
 ## Usage
 

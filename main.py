@@ -30,6 +30,17 @@ def extract_tool_call(text):
     return None
 
 
+def get_current_date_time() -> str:
+    """
+    Gets the current system time and formats it as a string.
+
+    Returns:
+        str: The current system time formatted as Weekday, Month Day, YYYY HH:MM:SS.
+    """
+    now = datetime.datetime.now()
+    return now.strftime("%A, %B %d, %Y %H:%M:%S")
+
+
 def convert(amount: float, currency: str, new_currency: str) -> None | float:
     # default ask:
     ask: float = 1.0
@@ -142,6 +153,14 @@ When using a ```tool_call``` think step by step why and how it should be used.
 The following Python methods are available:
 
 ```python
+def get_current_date_time() -> str:
+    """
+    Gets the current system time and formats it as a string.
+
+    Returns:
+        str: The current system time formatted as Weekday, Month Day, YYYY HH:MM:SS.
+    """
+
 def convert(amount: float, currency: str, new_currency: str) -> float:
     """Convert the currency with the latest exchange rate
 

@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 import pytz
 from ollama import AsyncClient
 
-MODEL = "gemma3:1b"
+MODEL = "gemma3:4b"
 
 
 def extract_tool_call(text):

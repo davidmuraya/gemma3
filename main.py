@@ -1,12 +1,12 @@
 import asyncio
-import datetime
 import io
 import re
 from contextlib import redirect_stdout
+from datetime import datetime
 
 from ollama import AsyncClient
 
-MODEL = "gemma3:4b"
+MODEL = "gemma3:1b"
 
 
 def extract_tool_call(text):
@@ -51,13 +51,15 @@ def extract_tool_call(text):
 
 def get_current_time() -> str:
     """
-    Gets the current system time and formats it as a string.
+    Gets the current system time and formats it as a string including
+    the weekday name and month name.
 
     Returns:
-        str: The current system time formatted as YYYY-MM-DD HH:MM:SS.
+        str: The current system time formatted as
+             Weekday, Month Day, YYYY HH:MM:SS.
     """
-    now = datetime.datetime.now()
-    return now.strftime("%Y-%m-%d %H:%M:%S")
+    now = datetime.now()
+    return now.strftime("%A, %B %d, %Y %H:%M:%S")
 
 
 instruction_prompt = '''You are a helpful assistant that can respond to questions directly or use tools when needed.
@@ -69,10 +71,13 @@ The following Python functions are available when needed:
 
 ```python
 def get_current_time() -> str:
-    """Get the current time in the format YYYY-MM-DD HH:MM:SS
+    """
+    Gets the current system time and formats it as a string including
+    the weekday name and month name.
 
     Returns:
-        str: The current time in the format YYYY-MM-DD HH:MM:SS
+        str: The current system time formatted as
+             Weekday, Month Day, YYYY HH:MM:SS.
     """
 ```
 
@@ -82,8 +87,6 @@ get_current_time()
 ```
 
 The response will be returned in a ```tool_output``` block.
-
-User: {user_message}
 '''
 
 
@@ -102,11 +105,9 @@ async def main():
 
             # Format the message: include instructions only on the first turn
             if not messages:
-                formatted_message = instruction_prompt.format(user_message=user_input)
-            else:
-                formatted_message = user_input
+                messages.append({"role": "system", "content": instruction_prompt})
 
-            messages.append({"role": "user", "content": formatted_message})
+            messages.append({"role": "user", "content": user_input})
 
             print("\nAssistant: ", end="", flush=True)
 

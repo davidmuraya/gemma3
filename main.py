@@ -53,8 +53,12 @@ def extract_tool_call(text):
 # Function to get the current system time
 async def get_current_date_time():
     """
-    Generate a multiline string of the current date and time for a comprehensive
-    list of global time zones.
+    Get the current date and time in different time zones.
+
+    Retrieves the current UTC time and computes the local time
+    for each predefined time zone by applying fixed offsets. It then formats
+    each local time as `YYYY-MM-DD HH:MM:SS` and compiles a line for each zone:
+    `"The current date and time in <Location> (<UTC offset>, <TZ code>) is <timestamp>."`
 
     Returns:
         str: A single string containing one line per time zone, separated by
@@ -127,8 +131,12 @@ The following Python functions are available when needed:
 ```python
 async def get_current_date_time():
     """
-    Generate a multiline string of the current date and time for a comprehensive
-    list of global time zones.
+    Get the current date and time in different time zones.
+
+    Retrieves the current UTC time and computes the local time
+    for each predefined time zone by applying fixed offsets. It then formats
+    each local time as `YYYY-MM-DD HH:MM:SS` and compiles a line for each zone:
+    `"The current date and time in <Location> (<UTC offset>, <TZ code>) is <timestamp>."`
 
     Returns:
         str: A single string containing one line per time zone, separated by

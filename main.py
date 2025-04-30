@@ -2,8 +2,14 @@ import asyncio
 import io
 import re
 from contextlib import redirect_stdout
+from datetime import datetime, timedelta
 
+import requests
 from ollama import AsyncClient
+
+from config import get_settings
+
+settings = get_settings()
 
 MODEL = "gemma3:4b"
 
@@ -24,14 +30,60 @@ def extract_tool_call(text):
     return None
 
 
-def convert(amount: float, currency: str, new_currency: str) -> float:
-    # demo implementation
-    return amount * 0.9
+def convert(amount: float, currency: str, new_currency: str) -> None | float:
+    # default ask:
+    ask: float = 1.0
+
+    # date today:
+    date_today = datetime.now().strftime("%Y-%m-%d")
+
+    # date yesterday:
+    date_yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+
+    # generate the url:
+    url = f"https://{settings.EXCHANGE_RATE_SITE}/cc-api/currencies?base={currency}&quote={new_currency}&data_type=general_currency_pair&start_date={date_yesterday}&end_date={date_today}"
+
+    response = requests.request("GET", url)
+
+    # convert to json:
+    rates = response.json()
+
+    if not rates:
+        return None
+
+    for rate in rates["response"]:
+        ask = rate["average_ask"]
+        break
+
+    return float(ask) * amount
 
 
-def get_exchange_rate(currency: str, new_currency: str) -> float:
-    # demo implementation
-    return 1.2
+def get_exchange_rate(currency: str, new_currency: str) -> None | float:
+    # default ask:
+    ask: float = 1.0
+
+    # date today:
+    date_today = datetime.now().strftime("%Y-%m-%d")
+
+    # date yesterday:
+    date_yesterday = (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d")
+
+    # generate the url:
+    url = f"https://{settings.EXCHANGE_RATE_SITE}/cc-api/currencies?base={currency}&quote={new_currency}&data_type=general_currency_pair&start_date={date_yesterday}&end_date={date_today}"
+
+    response = requests.request("GET", url)
+
+    # convert to json:
+    rates = response.json()
+
+    if not rates:
+        return None
+
+    for rate in rates["response"]:
+        ask = rate["average_ask"]
+        break
+
+    return float(ask)
 
 
 instruction_prompt = '''You are a helpful conversational AI assistant.

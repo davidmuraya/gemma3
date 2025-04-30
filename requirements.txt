@@ -1,3 +1,4 @@
 ollama
 requests
 pytz
+pydantic-settings

@@ -128,7 +128,7 @@ When using a ```tool_call``` think step by step why and how it should be used.
 The following Python methods are available:
 
 ```python
-def convert(amount: float, currency: str, new_currency: str) -> None | float:
+def convert(amount: float, currency: str, new_currency: str) -> float:
     """Convert the currency with the latest exchange rate
 
     Args:
@@ -137,7 +137,7 @@ def convert(amount: float, currency: str, new_currency: str) -> None | float:
       new_currency: The currency to convert to
     """
 
-def get_current_exchange_rate(currency: str, new_currency: str) -> None | float:
+def get_current_exchange_rate(currency: str, new_currency: str) -> float:
     """Get the latest exchange rate for the currency pair
 
     Args:
@@ -145,7 +145,7 @@ def get_current_exchange_rate(currency: str, new_currency: str) -> None | float:
       new_currency: The currency to convert to
     """
 
-def get_exchange_rate(currency: str, new_currency: str, date: str) -> None | float:
+def get_exchange_rate(currency: str, new_currency: str, date: str) -> float:
     """Get the historical exchange rate for the currency pair on a specific date
 
     Args:

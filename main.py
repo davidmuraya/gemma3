@@ -51,23 +51,19 @@ def extract_tool_call(text):
 
 
 # Function to get the current system time
-def get_current_date_time():
+def get_current_date_time(location: str = None) -> str:
     """
-    Get the current date and time in different time zones.
+    Get the current date and time for a specific location or all predefined locations.
 
-    Retrieves the current UTC time and computes the local time
-    for each predefined time zone by applying fixed offsets. It then formats
-    each local time as `YYYY-MM-DD HH:MM:SS` and compiles a line for each zone:
-    `"The current date and time in <Location> (<UTC offset>, <TZ code>) is <timestamp>."`
+    If a location is provided, returns the time for that location if found.
+    If no location is provided, returns times for all predefined locations.
+
+    Args:
+        location (str, optional): The name of the location (case-insensitive).
 
     Returns:
-        str: A single string containing one line per time zone, separated by
-             newline characters. Each line reports the current local date and
-             time for a specific region, including its UTC offset and
-             time-zone abbreviation.
+        str: Time for the specified location, all locations, or an error message.
     """
-
-    # Define time zones
     time_zones = [
         ("UTC +14", "LINT", "Kiritimati", timedelta(hours=14)),
         ("UTC +13:45", "CHADT", "Chatham Islands", timedelta(hours=13, minutes=45)),
@@ -110,15 +106,20 @@ def get_current_date_time():
     ]
 
     now_utc = datetime.now(pytz.utc)
-    time_strings = []
-
-    for tz_name, code, location, offset in time_zones:
-        local_time = now_utc + offset
-        time_strings.append(
-            f"The current date and time in {location} ({tz_name}, {code}) is {local_time.strftime('%Y-%m-%d %H:%M:%S')}."
-        )
-
-    return "\n".join(time_strings)
+    if location is None:
+        time_strings = []
+        for tz_name, code, loc, offset in time_zones:
+            local_time = now_utc + offset
+            time_strings.append(
+                f"The current date and time in {loc} ({tz_name}, {code}) is {local_time.strftime('%Y-%m-%d %H:%M:%S')}."
+            )
+        return "\n".join(time_strings)
+    else:
+        for tz_name, code, loc, offset in time_zones:
+            if loc.lower() == location.lower():
+                local_time = now_utc + offset
+                return f"The current date and time in {loc} ({tz_name}, {code}) is {local_time.strftime('%Y-%m-%d %H:%M:%S')}."
+        return f"Location '{location}' not found in the list of known time zones."
 
 
 instruction_prompt = '''You are a helpful conversational AI assistant.
@@ -135,23 +136,24 @@ When using a ```tool_call``` think step by step why and how it should be used.
 The following Python methods are available:
 
 ```python
-def get_current_date_time():
+def get_current_date_time(location: str = None) -> str:
     """
-    Get the current date and time in different time zones.
+    Get the current date and time for a specific location or all predefined locations.
 
-    Retrieves the current UTC time and computes the local time
-    for each predefined time zone by applying fixed offsets. It then formats
-    each local time as `YYYY-MM-DD HH:MM:SS` and compiles a line for each zone:
-    `"The current date and time in <Location> (<UTC offset>, <TZ code>) is <timestamp>."`
+    If a location is provided, returns the current time for that location if it matches a predefined location (case-insensitive).
+    If no location is provided, returns the current time for all predefined locations.
+
+    Available locations: Kiritimati, Chatham Islands, Auckland, Anadyr, Melbourne, Adelaide, Brisbane,
+    Darwin, Tokyo, Eucla, Beijing, Jakarta, Yangon, Dhaka, Kathmandu, New Delhi, Tashkent, Kabul, Dubai,
+    Tehran, Moscow, Cairo, Brussels, London, Praia, Nuuk, Buenos Aires, St. John's, Caracas, New York,
+    Mexico City, Calgary, Los Angeles, Anchorage, Taiohae, Honolulu, Alofi, Baker Island.
 
     Args:
-        None
+        location (str, optional): The name of the location to get the time for. If None, returns times for all locations.
 
     Returns:
-        str: A single string containing one line per time zone, separated by
-             newline characters. Each line reports the current local date and
-             time for a specific region, including its UTC offset and
-             time-zone abbreviation.
+        str: The current date and time for the specified location, or all locations if none specified.
+             If the location isn’t found, returns a message indicating so.
     """
 ```
 '''

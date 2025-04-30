@@ -2,124 +2,36 @@ import asyncio
 import io
 import re
 from contextlib import redirect_stdout
-from datetime import datetime, timedelta
 
-import pytz
 from ollama import AsyncClient
 
 MODEL = "gemma3:4b"
 
 
+# extract the tool call from the response
 def extract_tool_call(text):
-    """
-    Parses the model's response to find a tool_code block,
-    executes the code using eval() with a restricted namespace,
-    and returns the output formatted as ```tool_output```.
-    Returns None if no tool_code is found.
-    """
     pattern = r"```tool_code\s*(.*?)\s*```"
     match = re.search(pattern, text, re.DOTALL)
-
-    if not match:
-        return None
-
-    code = match.group(1).strip()
-
-    # Only allow access to specific functions to improve safety
-    safe_globals = {
-        "get_current_date_time": get_current_date_time,
-        # Add other safe functions here
-    }
-
-    # Check if the code is actually trying to call a function
-    if not any(func_name in code for func_name in safe_globals):
-        # Skip execution if no valid function call is detected
-        return None
-
-    try:
+    if match:
+        code = match.group(1).strip()
         # Capture stdout in a string buffer
         f = io.StringIO()
         with redirect_stdout(f):
-            # Use a restricted namespace for evaluation
-            result = eval(code, {"__builtins__": {}}, safe_globals)
-
+            result = eval(code)
         output = f.getvalue()
         r = result if output == "" else output
         return f"```tool_output\n{str(r).strip()}\n```"
-    except Exception as e:
-        return f"```tool_output\nError executing tool: {str(e)}\n```"
+    return None
 
 
-# Function to get the current system time
-def get_current_date_time(location: str = None) -> str:
-    """
-    Get the current date and time for a specific location or all predefined locations.
+def convert(amount: float, currency: str, new_currency: str) -> float:
+    # demo implementation
+    return amount * 0.9
 
-    If a location is provided, returns the time for that location if found.
-    If no location is provided, returns times for all predefined locations.
 
-    Args:
-        location (str, optional): The name of the location (case-insensitive).
-
-    Returns:
-        str: Time for the specified location, all locations, or an error message.
-    """
-    time_zones = [
-        ("UTC +14", "LINT", "Kiritimati", timedelta(hours=14)),
-        ("UTC +13:45", "CHADT", "Chatham Islands", timedelta(hours=13, minutes=45)),
-        ("UTC +13", "NZDT", "Auckland", timedelta(hours=13)),
-        ("UTC +12", "ANAT", "Anadyr", timedelta(hours=12)),
-        ("UTC +11", "AEDT", "Melbourne", timedelta(hours=11)),
-        ("UTC +10:30", "ACDT", "Adelaide", timedelta(hours=10, minutes=30)),
-        ("UTC +10", "AEST", "Brisbane", timedelta(hours=10)),
-        ("UTC +9:30", "ACST", "Darwin", timedelta(hours=9, minutes=30)),
-        ("UTC +9", "JST", "Tokyo", timedelta(hours=9)),
-        ("UTC +8:45", "ACWST", "Eucla", timedelta(hours=8, minutes=45)),
-        ("UTC +8", "CST", "Beijing", timedelta(hours=8)),
-        ("UTC +7", "WIB", "Jakarta", timedelta(hours=7)),
-        ("UTC +6:30", "MMT", "Yangon", timedelta(hours=6, minutes=30)),
-        ("UTC +6", "BST", "Dhaka", timedelta(hours=6)),
-        ("UTC +5:45", "NPT", "Kathmandu", timedelta(hours=5, minutes=45)),
-        ("UTC +5:30", "IST", "New Delhi", timedelta(hours=5, minutes=30)),
-        ("UTC +5", "UZT", "Tashkent", timedelta(hours=5)),
-        ("UTC +4:30", "AFT", "Kabul", timedelta(hours=4, minutes=30)),
-        ("UTC +4", "GST", "Dubai", timedelta(hours=4)),
-        ("UTC +3:30", "IRST", "Tehran", timedelta(hours=3, minutes=30)),
-        ("UTC +3", "MSK", "Moscow", timedelta(hours=3)),
-        ("UTC +2", "EET", "Cairo", timedelta(hours=2)),
-        ("UTC +1", "CET", "Brussels", timedelta(hours=1)),
-        ("UTC +0", "GMT", "London", timedelta(hours=0)),
-        ("UTC -1", "CVT", "Praia", timedelta(hours=-1)),
-        ("UTC -2", "WGT", "Nuuk", timedelta(hours=-2)),
-        ("UTC -3", "ART", "Buenos Aires", timedelta(hours=-3)),
-        ("UTC -3:30", "NST", "St. John's", timedelta(hours=-3, minutes=-30)),
-        ("UTC -4", "VET", "Caracas", timedelta(hours=-4)),
-        ("UTC -5", "EST", "New York", timedelta(hours=-5)),
-        ("UTC -6", "CST", "Mexico City", timedelta(hours=-6)),
-        ("UTC -7", "MST", "Calgary", timedelta(hours=-7)),
-        ("UTC -8", "PST", "Los Angeles", timedelta(hours=-8)),
-        ("UTC -9", "AKST", "Anchorage", timedelta(hours=-9)),
-        ("UTC -9:30", "MART", "Taiohae", timedelta(hours=-9, minutes=-30)),
-        ("UTC -10", "HST", "Honolulu", timedelta(hours=-10)),
-        ("UTC -11", "NUT", "Alofi", timedelta(hours=-11)),
-        ("UTC -12", "AoE", "Baker Island", timedelta(hours=-12)),
-    ]
-
-    now_utc = datetime.now(pytz.utc)
-    if location is None:
-        time_strings = []
-        for tz_name, code, loc, offset in time_zones:
-            local_time = now_utc + offset
-            time_strings.append(
-                f"The current date and time in {loc} ({tz_name}, {code}) is {local_time.strftime('%Y-%m-%d %H:%M:%S')}."
-            )
-        return "\n".join(time_strings)
-    else:
-        for tz_name, code, loc, offset in time_zones:
-            if loc.lower() == location.lower():
-                local_time = now_utc + offset
-                return f"The current date and time in {loc} ({tz_name}, {code}) is {local_time.strftime('%Y-%m-%d %H:%M:%S')}."
-        return f"Location '{location}' not found in the list of known time zones."
+def get_exchange_rate(currency: str, new_currency: str) -> float:
+    # demo implementation
+    return 1.2
 
 
 instruction_prompt = '''You are a helpful conversational AI assistant.
@@ -136,24 +48,21 @@ When using a ```tool_call``` think step by step why and how it should be used.
 The following Python methods are available:
 
 ```python
-def get_current_date_time(location: str = None) -> str:
-    """
-    Get the current date and time for a specific location or all predefined locations.
-
-    If a location is provided, returns the current time for that location if it matches a predefined location (case-insensitive).
-    If no location is provided, returns the current time for all predefined locations.
-
-    Available locations: Kiritimati, Chatham Islands, Auckland, Anadyr, Melbourne, Adelaide, Brisbane,
-    Darwin, Tokyo, Eucla, Beijing, Jakarta, Yangon, Dhaka, Kathmandu, New Delhi, Tashkent, Kabul, Dubai,
-    Tehran, Moscow, Cairo, Brussels, London, Praia, Nuuk, Buenos Aires, St. John's, Caracas, New York,
-    Mexico City, Calgary, Los Angeles, Anchorage, Taiohae, Honolulu, Alofi, Baker Island.
+def convert(amount: float, currency: str, new_currency: str) -> float:
+    """Convert the currency with the latest exchange rate
 
     Args:
-        location (str, optional): The name of the location to get the time for. If None, returns times for all locations.
+      amount: The amount of currency to convert
+      currency: The currency to convert from
+      new_currency: The currency to convert to
+    """
 
-    Returns:
-        str: The current date and time for the specified location, or all locations if none specified.
-             If the location isn’t found, returns a message indicating so.
+def get_exchange_rate(currency: str, new_currency: str) -> float:
+    """Get the latest exchange rate for the currency pair
+
+    Args:
+      currency: The currency to convert from
+      new_currency: The currency to convert to
     """
 ```
 '''

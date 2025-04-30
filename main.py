@@ -58,7 +58,7 @@ def convert(amount: float, currency: str, new_currency: str) -> None | float:
     return float(ask) * amount
 
 
-def get_exchange_rate(currency: str, new_currency: str) -> None | float:
+def get_current_exchange_rate(currency: str, new_currency: str) -> None | float:
     # default ask:
     ask: float = 1.0
 
@@ -70,6 +70,34 @@ def get_exchange_rate(currency: str, new_currency: str) -> None | float:
 
     # generate the url:
     url = f"https://{settings.EXCHANGE_RATE_SITE}/cc-api/currencies?base={currency}&quote={new_currency}&data_type=general_currency_pair&start_date={date_yesterday}&end_date={date_today}"
+
+    response = requests.request("GET", url)
+
+    # convert to json:
+    rates = response.json()
+
+    if not rates:
+        return None
+
+    for rate in rates["response"]:
+        ask = rate["average_ask"]
+        break
+
+    return float(ask)
+
+
+def get_exchange_rate(currency: str, new_currency: str, date: str) -> None | float:
+    # default ask:
+    ask: float = 1.0
+
+    # conversion date:
+    d = datetime.strptime(date, "%Y-%m-%d")
+
+    # date yesterday:
+    previous_day = (d - timedelta(days=1)).strftime("%Y-%m-%d")
+
+    # generate the url:
+    url = f"https://{settings.EXCHANGE_RATE_SITE}/cc-api/currencies?base={currency}&quote={new_currency}&data_type=general_currency_pair&start_date={previous_day}&end_date={date}"
 
     response = requests.request("GET", url)
 
@@ -100,7 +128,7 @@ When using a ```tool_call``` think step by step why and how it should be used.
 The following Python methods are available:
 
 ```python
-def convert(amount: float, currency: str, new_currency: str) -> float:
+def convert(amount: float, currency: str, new_currency: str) -> None |float:
     """Convert the currency with the latest exchange rate
 
     Args:
@@ -109,12 +137,21 @@ def convert(amount: float, currency: str, new_currency: str) -> float:
       new_currency: The currency to convert to
     """
 
-def get_exchange_rate(currency: str, new_currency: str) -> float:
+def get_current_exchange_rate(currency: str, new_currency: str) -> None | float:
     """Get the latest exchange rate for the currency pair
 
     Args:
       currency: The currency to convert from
       new_currency: The currency to convert to
+    """
+
+def get_exchange_rate(currency: str, new_currency: str, date: str) -> None |float:
+    """Get the historical exchange rate for the currency pair on a specific date
+
+    Args:
+      currency: The currency to convert from
+      new_currency: The currency to convert to
+      date: The target date (in 'YYYY-MM-DD' format) for which to fetch the rate
     """
 ```
 '''
@@ -160,7 +197,8 @@ async def main():
 
             if not contains_tool_syntax:
                 # No tool call syntax, we've already printed the response
-                print()  # Add a newline
+                # Add a newline
+                print()
                 continue
 
             # If we get here, there's a tool call syntax in the message

@@ -144,6 +144,9 @@ def get_current_date_time():
     each local time as `YYYY-MM-DD HH:MM:SS` and compiles a line for each zone:
     `"The current date and time in <Location> (<UTC offset>, <TZ code>) is <timestamp>."`
 
+    Args:
+        None
+
     Returns:
         str: A single string containing one line per time zone, separated by
              newline characters. Each line reports the current local date and

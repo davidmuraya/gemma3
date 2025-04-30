@@ -140,7 +140,7 @@ async def get_current_date_time():
 
 When you need to use a tool, place the code in a ```tool_code``` block like this:
 ```tool_code
-get_current_time()
+get_current_date_time()
 ```
 
 The response will be returned in a ```tool_output``` block.

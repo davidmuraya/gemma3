@@ -3,11 +3,9 @@
 .idea/
 .pytest_cache/
 
-# data files e.g. excel files:
-app/backend/data/
+
 .bash_history
 
-app/frontend/static/assets/img/qr-codes/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

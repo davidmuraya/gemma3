@@ -2,7 +2,7 @@ import asyncio
 import io
 import re
 from contextlib import redirect_stdout
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import pytz
 from ollama import AsyncClient
@@ -27,7 +27,7 @@ def extract_tool_call(text):
 
     # Only allow access to specific functions to improve safety
     safe_globals = {
-        "get_current_time": get_current_time,
+        "get_current_date_time": get_current_date_time,
         # Add other safe functions here
     }
 
@@ -50,24 +50,71 @@ def extract_tool_call(text):
         return f"```tool_output\nError executing tool: {str(e)}\n```"
 
 
-def get_current_time(tz_name: str = "UTC") -> str:
+# Function to get the current system time
+async def get_current_date_time():
     """
-    Gets the current system date and time in the specified timezone and
-    formats it as a string including the weekday name, month name, date,
-    time, timezone abbreviation, and offset.
-
-    Args:
-        tz_name (str): The IANA timezone name (e.g. 'UTC', 'Europe/London',
-                       'America/New_York', 'Africa/Nairobi'). Defaults to 'UTC'.
+    Generate a multiline string of the current date and time for a comprehensive
+    list of global time zones.
 
     Returns:
-        str: The current time formatted as
-             Weekday, Month Day, YYYY HH:MM:SS TZ_ABBR±HHMM.
+        str: A single string containing one line per time zone, separated by
+             newline characters. Each line reports the current local date and
+             time for a specific region, including its UTC offset and
+             time-zone abbreviation.
     """
-    tz = pytz.timezone(tz_name)
-    now = datetime.datetime.now(tz)
-    # %Z = timezone name, %z = +HHMM offset
-    return now.strftime("%A, %B %d, %Y %H:%M:%S %Z%z")
+
+    # Define time zones
+    time_zones = [
+        ("UTC +14", "LINT", "Kiritimati", timedelta(hours=14)),
+        ("UTC +13:45", "CHADT", "Chatham Islands", timedelta(hours=13, minutes=45)),
+        ("UTC +13", "NZDT", "Auckland", timedelta(hours=13)),
+        ("UTC +12", "ANAT", "Anadyr", timedelta(hours=12)),
+        ("UTC +11", "AEDT", "Melbourne", timedelta(hours=11)),
+        ("UTC +10:30", "ACDT", "Adelaide", timedelta(hours=10, minutes=30)),
+        ("UTC +10", "AEST", "Brisbane", timedelta(hours=10)),
+        ("UTC +9:30", "ACST", "Darwin", timedelta(hours=9, minutes=30)),
+        ("UTC +9", "JST", "Tokyo", timedelta(hours=9)),
+        ("UTC +8:45", "ACWST", "Eucla", timedelta(hours=8, minutes=45)),
+        ("UTC +8", "CST", "Beijing", timedelta(hours=8)),
+        ("UTC +7", "WIB", "Jakarta", timedelta(hours=7)),
+        ("UTC +6:30", "MMT", "Yangon", timedelta(hours=6, minutes=30)),
+        ("UTC +6", "BST", "Dhaka", timedelta(hours=6)),
+        ("UTC +5:45", "NPT", "Kathmandu", timedelta(hours=5, minutes=45)),
+        ("UTC +5:30", "IST", "New Delhi", timedelta(hours=5, minutes=30)),
+        ("UTC +5", "UZT", "Tashkent", timedelta(hours=5)),
+        ("UTC +4:30", "AFT", "Kabul", timedelta(hours=4, minutes=30)),
+        ("UTC +4", "GST", "Dubai", timedelta(hours=4)),
+        ("UTC +3:30", "IRST", "Tehran", timedelta(hours=3, minutes=30)),
+        ("UTC +3", "MSK", "Moscow", timedelta(hours=3)),
+        ("UTC +2", "EET", "Cairo", timedelta(hours=2)),
+        ("UTC +1", "CET", "Brussels", timedelta(hours=1)),
+        ("UTC +0", "GMT", "London", timedelta(hours=0)),
+        ("UTC -1", "CVT", "Praia", timedelta(hours=-1)),
+        ("UTC -2", "WGT", "Nuuk", timedelta(hours=-2)),
+        ("UTC -3", "ART", "Buenos Aires", timedelta(hours=-3)),
+        ("UTC -3:30", "NST", "St. John's", timedelta(hours=-3, minutes=-30)),
+        ("UTC -4", "VET", "Caracas", timedelta(hours=-4)),
+        ("UTC -5", "EST", "New York", timedelta(hours=-5)),
+        ("UTC -6", "CST", "Mexico City", timedelta(hours=-6)),
+        ("UTC -7", "MST", "Calgary", timedelta(hours=-7)),
+        ("UTC -8", "PST", "Los Angeles", timedelta(hours=-8)),
+        ("UTC -9", "AKST", "Anchorage", timedelta(hours=-9)),
+        ("UTC -9:30", "MART", "Taiohae", timedelta(hours=-9, minutes=-30)),
+        ("UTC -10", "HST", "Honolulu", timedelta(hours=-10)),
+        ("UTC -11", "NUT", "Alofi", timedelta(hours=-11)),
+        ("UTC -12", "AoE", "Baker Island", timedelta(hours=-12)),
+    ]
+
+    now_utc = datetime.now(pytz.utc)
+    time_strings = []
+
+    for tz_name, code, location, offset in time_zones:
+        local_time = now_utc + offset
+        time_strings.append(
+            f"The current date and time in {location} ({tz_name}, {code}) is {local_time.strftime('%Y-%m-%d %H:%M:%S')}."
+        )
+
+    return "\n".join(time_strings)
 
 
 instruction_prompt = '''You are a helpful assistant that can respond to questions directly or use tools when needed.
@@ -78,19 +125,16 @@ For questions that don't require any specific tools, just respond normally witho
 The following Python functions are available when needed:
 
 ```python
-def get_current_time(tz_name: str = 'UTC') -> str:
+async def get_current_date_time():
     """
-    Gets the current system date and time in the specified timezone and
-    formats it as a string including the weekday name, month name, date,
-    time, timezone abbreviation, and offset.
-
-    Args:
-        tz_name (str): The IANA timezone name (e.g. 'UTC', 'Europe/London',
-                       'America/New_York', 'Africa/Nairobi'). Defaults to 'UTC'.
+    Generate a multiline string of the current date and time for a comprehensive
+    list of global time zones.
 
     Returns:
-        str: The current time formatted as
-             Weekday, Month Day, YYYY HH:MM:SS TZ_ABBR±HHMM.
+        str: A single string containing one line per time zone, separated by
+             newline characters. Each line reports the current local date and
+             time for a specific region, including its UTC offset and
+             time-zone abbreviation.
     """
 ```
 

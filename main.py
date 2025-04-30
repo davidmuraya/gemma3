@@ -121,9 +121,14 @@ def get_current_date_time():
     return "\n".join(time_strings)
 
 
-instruction_prompt = '''At each turn, if you decide to invoke any of the function(s), it should be wrapped with ```tool_code```.
+instruction_prompt = '''You are a helpful conversational AI assistant.
+At each turn, if you decide to invoke any of the function(s), it should be wrapped with ```tool_code```.
 The python methods described below are imported and available, you can only use defined methods.
+ONLY use the ```tool_code``` format when absolutely necessary to answer the user's question.
 The generated code should be readable and efficient.
+
+For questions that don't require any specific tools, just respond normally without tool calls.
+
 The response to a method will be wrapped in ```tool_output``` use it to call more tools or generate a helpful, friendly response.
 When using a ```tool_call``` think step by step why and how it should be used.
 

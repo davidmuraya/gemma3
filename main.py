@@ -51,8 +51,8 @@ def extract_tool_call(text):
 
 def get_current_time() -> str:
     """
-    Gets the current system time and formats it as a string including
-    the weekday name and month name.
+    Gets the current system date and time and formats it as a string including
+    the weekday name and month name, date and time.
 
     Returns:
         str: The current system time formatted as
@@ -72,8 +72,8 @@ The following Python functions are available when needed:
 ```python
 def get_current_time() -> str:
     """
-    Gets the current system time and formats it as a string including
-    the weekday name and month name.
+    Gets the current system date and time and formats it as a string including
+    the weekday name and month name, date and time.
 
     Returns:
         str: The current system time formatted as

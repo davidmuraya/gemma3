@@ -130,7 +130,7 @@ When using a ```tool_call``` think step by step why and how it should be used.
 The following Python methods are available:
 
 ```python
-async def get_current_date_time():
+def get_current_date_time():
     """
     Get the current date and time in different time zones.
 

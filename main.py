@@ -37,7 +37,7 @@ def get_current_date_time() -> str:
     Returns:
         str: The current system time formatted as Weekday, Month Day, YYYY HH:MM:SS.
     """
-    now = datetime.datetime.now()
+    now = datetime.now()
     return now.strftime("%A, %B %d, %Y %H:%M:%S")
 
 
@@ -139,6 +139,7 @@ def get_historical_exchange_rate(
     return float(ask)
 
 
+# Ensure you do not include any "." in the prompt - you will get errors during the function call!S
 instruction_prompt = '''You are a helpful conversational AI assistant.
 At each turn, if you decide to invoke any of the function(s), it should be wrapped with ```tool_code```.
 The python methods described below are imported and available, you can only use defined methods.

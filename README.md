@@ -26,8 +26,9 @@ The script:
 
 ## Prerequisites
 
-- Python 3.8+
-- [Ollama](https://ollama.com/) running locally and listening on `http://127.0.0.1:11434`
+- Python 3.11+
+-  .env file that contains the URL where to get exchange rates `EXCHANGE_RATE_SITE=....oanda.com`
+- [Ollama](https://ollama.com/) running locally
 - Gemma3 Model run `ollama run gemma3:4b` after installing ollama.
 
 ## Installation
@@ -65,7 +66,7 @@ You:
 ```
 
 - Type your question and hit **Enter**.
-- If the model responds with a `tool_code` block (e.g., to call `get_current_time()`), the script will execute the code and feed the output back to the model.
+- If the model responds with a `tool_code` block (e.g., to call `get_exchange_rate(currency='TZS', new_currency='USD')`), the script will execute the code and feed the output back to the model.
 - Type `quit`, `exit`, or `q` to end the session.
 
 ## How It Works
@@ -74,16 +75,12 @@ You:
 2. **Function Injection**: An `instruction_prompt` tells the model when and how to wrap code calls in a ````tool_code```` block.
 3. **Tool Extraction**: The `extract_tool_call` function:
    - Searches for a ````tool_code```` fenced block.
-   - Safely `eval()`s approved helper functions (e.g., `get_current_time`).
+   - Eval()`s approved helper functions (e.g., `get_exchange_rate(currency='TZS', new_currency='USD')`).
    - Captures and returns execution output as a ````tool_output```` block.
 4. **Second Pass**: If a tool call occurred, the script appends the output to the conversation and streams a final model response.
 
-## Extending the Toolbox
-
-- Add new safe functions to `extract_tool_call` by:
-  1. Defining the function in `main.py`.
-  2. Adding it to the `safe_globals` dict.
-  3. Updating the `instruction_prompt` so the model knows it’s available.
+   ### Output
+   ![image](https://github.com/user-attachments/assets/c24d9b52-a404-4f47-a44b-2c16f513041f)
 
 ## Contributing
 

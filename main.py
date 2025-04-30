@@ -154,10 +154,10 @@ The following Python methods are available:
 
 ```python
 def get_current_date_time() -> str:
-    """Gets the current system time and formats it as a string.
+    """Gets the current system time and formats it as a string
 
     Args:
-        None.
+        None
     """
 
 def convert(amount: float, currency: str, new_currency: str) -> float:

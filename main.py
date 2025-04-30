@@ -4,6 +4,7 @@ import re
 from contextlib import redirect_stdout
 from datetime import datetime
 
+import pytz
 from ollama import AsyncClient
 
 MODEL = "gemma3:1b"
@@ -49,17 +50,24 @@ def extract_tool_call(text):
         return f"```tool_output\nError executing tool: {str(e)}\n```"
 
 
-def get_current_time() -> str:
+def get_current_time(tz_name: str = "UTC") -> str:
     """
-    Gets the current system date and time and formats it as a string including
-    the weekday name and month name, date and time.
+    Gets the current system date and time in the specified timezone and
+    formats it as a string including the weekday name, month name, date,
+    time, timezone abbreviation, and offset.
+
+    Args:
+        tz_name (str): The IANA timezone name (e.g. 'UTC', 'Europe/London',
+                       'America/New_York', 'Africa/Nairobi'). Defaults to 'UTC'.
 
     Returns:
-        str: The current system time formatted as
-             Weekday, Month Day, YYYY HH:MM:SS.
+        str: The current time formatted as
+             Weekday, Month Day, YYYY HH:MM:SS TZ_ABBR±HHMM.
     """
-    now = datetime.now()
-    return now.strftime("%A, %B %d, %Y %H:%M:%S")
+    tz = pytz.timezone(tz_name)
+    now = datetime.datetime.now(tz)
+    # %Z = timezone name, %z = +HHMM offset
+    return now.strftime("%A, %B %d, %Y %H:%M:%S %Z%z")
 
 
 instruction_prompt = '''You are a helpful assistant that can respond to questions directly or use tools when needed.
@@ -70,14 +78,19 @@ For questions that don't require any specific tools, just respond normally witho
 The following Python functions are available when needed:
 
 ```python
-def get_current_time() -> str:
+def get_current_time(tz_name: str = 'UTC') -> str:
     """
-    Gets the current system date and time and formats it as a string including
-    the weekday name and month name, date and time.
+    Gets the current system date and time in the specified timezone and
+    formats it as a string including the weekday name, month name, date,
+    time, timezone abbreviation, and offset.
+
+    Args:
+        tz_name (str): The IANA timezone name (e.g. 'UTC', 'Europe/London',
+                       'America/New_York', 'Africa/Nairobi'). Defaults to 'UTC'.
 
     Returns:
-        str: The current system time formatted as
-             Weekday, Month Day, YYYY HH:MM:SS.
+        str: The current time formatted as
+             Weekday, Month Day, YYYY HH:MM:SS TZ_ABBR±HHMM.
     """
 ```
 

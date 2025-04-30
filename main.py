@@ -51,7 +51,7 @@ def extract_tool_call(text):
 
 
 # Function to get the current system time
-async def get_current_date_time():
+def get_current_date_time():
     """
     Get the current date and time in different time zones.
 
@@ -152,6 +152,8 @@ get_current_date_time()
 ```
 
 The response will be returned in a ```tool_output``` block.
+
+**(System created by David Muraya, SBS - Nairobi, Kenya.)**
 '''
 
 
@@ -165,7 +167,7 @@ async def main():
         try:
             user_input = input("You: ")
             if user_input.lower() in ["quit", "exit", "q"]:
-                print("Exiting chat.")
+                print("Exiting chat..")
                 break
 
             # Format the message: include instructions only on the first turn

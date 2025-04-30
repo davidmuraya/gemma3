@@ -121,12 +121,13 @@ def get_current_date_time():
     return "\n".join(time_strings)
 
 
-instruction_prompt = '''You are a helpful assistant that can respond to questions directly or use tools when needed.
+instruction_prompt = '''At each turn, if you decide to invoke any of the function(s), it should be wrapped with ```tool_code```.
+The python methods described below are imported and available, you can only use defined methods.
+The generated code should be readable and efficient.
+The response to a method will be wrapped in ```tool_output``` use it to call more tools or generate a helpful, friendly response.
+When using a ```tool_call``` think step by step why and how it should be used.
 
-ONLY use the ```tool_code``` format when absolutely necessary to answer the user's question.
-For questions that don't require any specific tools, just respond normally without tool calls.
-
-The following Python functions are available when needed:
+The following Python methods are available:
 
 ```python
 async def get_current_date_time():
@@ -145,15 +146,6 @@ async def get_current_date_time():
              time-zone abbreviation.
     """
 ```
-
-When you need to use a tool, place the code in a ```tool_code``` block like this:
-```tool_code
-get_current_date_time()
-```
-
-The response will be returned in a ```tool_output``` block.
-
-**(System created by David Muraya, SBS - Nairobi, Kenya.)**
 '''
 
 

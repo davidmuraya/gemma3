@@ -51,6 +51,10 @@ def convert(amount: float, currency: str, new_currency: str) -> None | float:
     if not rates:
         return None
 
+    if rates:
+        if "error" in rates:
+            return None
+
     for rate in rates["response"]:
         ask = rate["average_ask"]
         break
@@ -79,6 +83,10 @@ def get_current_exchange_rate(currency: str, new_currency: str) -> None | float:
     if not rates:
         return None
 
+    if rates:
+        if "error" in rates:
+            return None
+
     for rate in rates["response"]:
         ask = rate["average_ask"]
         break
@@ -86,7 +94,9 @@ def get_current_exchange_rate(currency: str, new_currency: str) -> None | float:
     return float(ask)
 
 
-def get_exchange_rate(currency: str, new_currency: str, date: str) -> None | float:
+def get_historical_exchange_rate(
+    currency: str, new_currency: str, date: str
+) -> None | float:
     # default ask:
     ask: float = 1.0
 
@@ -106,6 +116,10 @@ def get_exchange_rate(currency: str, new_currency: str, date: str) -> None | flo
 
     if not rates:
         return None
+
+    if rates:
+        if "error" in rates:
+            return None
 
     for rate in rates["response"]:
         ask = rate["average_ask"]
@@ -145,7 +159,7 @@ def get_current_exchange_rate(currency: str, new_currency: str) -> float:
       new_currency: The currency to convert to
     """
 
-def get_exchange_rate(currency: str, new_currency: str, date: str) -> float:
+def get_historical_exchange_rate(currency: str, new_currency: str, date: str) -> float:
     """Get the historical exchange rate for the currency pair on a specific date
 
     Args:

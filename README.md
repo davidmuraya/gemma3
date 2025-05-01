@@ -2,7 +2,7 @@
 
 ### Local conversational agent
 
-This repository contains a single Python script, `main.py`, that provides a local conversational interface to an Ollama model (`gemma3:4b`) with built-in tool-calling capabilities.
+This repository contains a python application, that provides a local conversational interface to an Ollama model (`gemma3:4b`) with built-in tool-calling capabilities.
 
 Gemma 3:4b, is a lightweight, open model built from the same research and technology that powers Gemini 2.0 models. These are Google's most advanced, portable and responsibly developed open models yet. They are designed to run fast, directly on devices — from phones and laptops to workstations.
 
